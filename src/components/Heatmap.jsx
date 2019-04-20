@@ -1,63 +1,55 @@
-import React, { Component } from 'react'
-import MapGL, { Marker, Popup, NavigationControl } from 'react-map-gl'
+import React, { Component } from 'react';
+import 'mapbox-gl/dist/mapbox-gl.css'
+import mapboxgl from 'mapbox-gl';
+
+mapboxgl.accessToken = 'pk.eyJ1IjoiaW5kcmFhc3VyYSIsImEiOiJjanVudXFubXIybnl1NGFxajl4NnhqMmxxIn0.AHypC9nLffvVIXp2WW8REw';
 
 
-const TOKEN = 'pk.eyJ1IjoiaW5kcmFhc3VyYSIsImEiOiJjanVudXFubXIybnl1NGFxajl4NnhqMmxxIn0.AHypC9nLffvVIXp2WW8REw'
-
-const navStyle = {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    padding: '10px',
-}
 
 class Heatmap extends Component {
 
-    constructor(props) {
-        super(props);
-        this.state = {
-          viewport: {
-            latitude: 22.719568,
-            longitude: 22.719568,
-            zoom: 1.8,
-            bearing: 0,
-            pitch: 0,
-            width: '100%',
-            height: 690,
-          },
-          popupInfo: null
-        };
-        this.renderPopup = this.renderPopup.bind(this)
-      }
-     
-    renderPopup(){
-        return this.state.popupInfo && (
-            <Popup tipSize={5}
-              anchor="bottom-right"
-              longitude={this.state.popupInfo.state.longitude}
-              latitude={this.state.popupInfo.state.latitude}
-              onClose={() => this.setState({popupInfo: null})}
-              closeOnClick={true}>
-              <p>POPUP INFO HERE</p>
-            </Popup>
-          )
+  constructor(props) {
+      super(props);
+      this.state = {
+        lng: 1.2217,
+        lat: 39.8499,
+        zoom: 6.48
+      };
+
     }
-    render() { 
-        const { viewport } = this.state
-        return ( 
-            <MapGL
-        {...viewport}
-        mapStyle="mapbox://sprites/mapbox/satellite-v9"
-        mapboxApiAccessToken={TOKEN} >
-        {this.renderPopup()}
-        <div className="nav" style={navStyle}>
-          <NavigationControl/>
-          <Marker longitude={this.state.viewport.longitude} latitude={this.state.viewport.latitude}>
-          </Marker>
+
+  componentDidMount() {
+      const { lng, lat, zoom } = this.state;
+
+      var map = new mapboxgl.Map({
+        container: 'map',
+        center: [lng, lat],
+        style: 'mapbox://styles/mapbox/streets-v10',
+        zoom: zoom
+      });
+
+      map.on('move', () => {
+        const { lng, lat } = map.getCenter();
+
+        this.setState({
+          lng: lng.toFixed(4),
+          lat: lat.toFixed(4),
+          zoom: map.getZoom().toFixed(2)
+        });
+      });
+  }
+
+  render() {
+      const { lng, lat, zoom } = this.state;
+      return (
+        <div className="App">
+            <div className="inline-block absolute top left mt12 ml12 bg-darken75 color-white z1 py6 px12 round-full txt-s txt-bold">
+              <div>{`Longitude: ${lng} Latitude: ${lat} Zoom: ${zoom}`}</div>
+            </div>
+          <div id="map" />
         </div>
-      </MapGL>
-         );
-    }
+      );
+  }
 }
- 
+
 export default Heatmap;
